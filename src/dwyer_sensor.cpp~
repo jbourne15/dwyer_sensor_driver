@@ -1,0 +1,49 @@
+//#include <wiringPiI2C.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <numeric>
+#include <time.h>
+#include <wiringPi.h>
+
+#include "ros/ros.h"
+#include <std_msgs/Header.h>
+#include <sensor_msgs/FluidPressure.h>
+
+
+int main(int argc, char **argv)
+{
+
+  //  wiringPiSetup();
+  ros::init(argc, argv, "weather_board_driver");
+  ros::NodeHandle n;
+  //ros::Publisher wb_pub = n.advertise<weather_board_driver::wb_list>("wb_list", 1);
+
+  FILE *fd = NULL;  
+  
+  int lr=5;
+  //  n.getParam("/sensorhz", lr);
+  ros::Rate loop_rate(lr);
+  int adcValue;
+  double i=0, p=0;
+
+  fd = fopen("/sys/class/saradc/ch0", "rb");
+  
+  while (ros::ok()) {
+
+    char buf[10] = {0};
+    fread(buf,sizeof(char),10,fd);
+    
+    i = atof(buf)*0.02147;
+    p = (i*.03125-.125);
+    std::cout<<"adc: "<<atof(buf)<<" units"<<"   i: "<<i<<" mA"<<"   p: "<<p<<" Pa"<<std::endl;
+    sleep(1);
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+  return 0;
+}
