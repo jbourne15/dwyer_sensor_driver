@@ -18,19 +18,27 @@
 int main(int argc, char **argv)
 {
 
-  ros::init(argc, argv, "weather_board_driver");
+  ros::init(argc, argv, "dwyer_sensor");
   ros::NodeHandle n;
   ros::Publisher pub = n.advertise<sensor_msgs::FluidPressure>("dwyer_pressure", 1);
 
+
   FILE *fd = NULL;  
   
-  int lr=100;
+  int lr;
+  n.getParam("/loopR", lr);
+  
   ros::Rate loop_rate(lr);
   int adcValue;
   double i=0, p=0;
+
+
+  int biasCheck;
+  n.getParam("/biasC", biasCheck);
+  double bias = 0;
   
-  std::cout<<fd<<std::endl;
-  
+  //std::cout<<fd<<std::endl;
+  int c=0;
   while (ros::ok()) {
 
     // requires opening and closing to work.
@@ -38,17 +46,31 @@ int main(int argc, char **argv)
     char buf[10] = {0};
     fread(buf,sizeof(char),10,fd);    
     fclose(fd);
-    
-    i = atof(buf)*0.02147;
-    p = (i*.03125-.125)*248.84;
-    //std::cout<<"adc: "<<atof(buf)<<" units"<<"   i: "<<i<<" mA"<<"   p: "<<p<<" Pa"<<std::endl;
 
-    sensor_msgs::FluidPressure msg;
-    msg.header.stamp =ros::Time::now();
-    msg.header.frame_id ="source";    
-    msg.fluid_pressure = p;
-
-    pub.publish(msg);
+    if (c>biasCheck){            
+      i = atof(buf)*bias; // bias is average value of pressure during beginning of startup
+      p = (i*.03125-.125)*248.84; // (Pa)
+      //std::cout<<"adc: "<<atof(buf)<<" units"<<"   i: "<<i<<" mA"<<"   p: "<<p<<" Pa"<<std::endl;
+      
+      sensor_msgs::FluidPressure msg;
+      msg.header.stamp =ros::Time::now();
+      msg.header.frame_id ="source";    
+      msg.fluid_pressure = p;
+      
+      pub.publish(msg);
+    }
+    else{      
+      bias+=atof(buf);
+      //std::cout<<atof(buf)<<std::endl;
+      if (c==biasCheck){
+	//ROS_INFO("[dwyer] bias: %f", bias);
+	bias = bias /(biasCheck+1);
+	ROS_INFO("[dwyer] bias: %f", bias);
+	bias = 4.0/bias;
+	ROS_INFO("[dwyer] bias: %f", bias);
+      }
+      c++;
+    }
     
     ros::spinOnce();
     loop_rate.sleep();

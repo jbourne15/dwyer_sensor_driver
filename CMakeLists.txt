@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  message_generation
+  weather_board_driver
 )
 
 ## System dependencies are found with CMake's conventions
@@ -45,11 +47,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+   FILES
+   releaseVel.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -131,16 +132,22 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(dwyer_sensor_driver_node src/dwyer_sensor_driver_node.cpp)
-add_executable(dwyer_sensor_driver src/dwyer_sensor.cpp)
+add_executable(dwyer_sensor src/dwyer_sensor.cpp)
+add_executable(release_vel src/release_vel_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(dwyer_sensor_driver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(release_vel ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(dwyer_sensor_driver
+target_link_libraries(dwyer_sensor
   ${catkin_LIBRARIES}
   wiringPi
+  )
+
+target_link_libraries(release_vel
+  ${catkin_LIBRARIES}
 )
 
 #############
