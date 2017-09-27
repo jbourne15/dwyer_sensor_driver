@@ -1,0 +1,15 @@
+<launch>
+        <param name="hz" type="int" value="100"/>
+	### wb sensors on box ###
+	#-------------------------------#
+	<group ns="top">
+		<param name="dev" type="int" value="2"/>
+		<node pkg="weather_board_driver" type="single_wb_driver" name="wb_sensor" output="screen"/>
+	</group>
+	#-------------------------------#
+	<group ns="bot">
+		<param name="dev" type="int" value="1"/>
+		<node pkg="weather_board_driver" type="single_wb_driver" name="wb_sensor" output="screen"/>
+	</group>
+	#-------------------------------#
+</launch>

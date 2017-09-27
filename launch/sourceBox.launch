@@ -1,21 +1,19 @@
 <launch>
 
-	<param name="hz" type="int" value="100"/>
-	### Plume source from Box ###
-	#-------------------------------#
-	<node pkg="weather_board_driver" type="single_wb_driver" name="Box_wb_sensor" output="screen"/>
+	<!-- top and bot wb sensors -->
+	<include file="$(find dwyer_sensor_driver)/launch/wbBox.launch" /> 
 
-	### dwyer sensor nodes ###
+	### Plume source from Box ###
 	#-------------------------------#
 	<param name="biasC" type="int" value="100"/>
 	<param name="loopR" type="int" value="100"/>
+	<param name="tc" type="double" value=".1"/>
 	<node pkg="dwyer_sensor_driver" type="dwyer_sensor" name="dwyer_sensor" output="screen"/>
-
-	<param name="loopR" type="int" value="100"/>
+	#-------------------------------#
 	<param name="Kl" type="double" value="0.5"/>
 	# in inches #
-	<param name="radi" type="double" value="3"/>
-	
+	<param name="radi" type="double" value="3"/>	
 	<node pkg="dwyer_sensor_driver" type="release_vel" name="release_vel" output="screen"/>
+	#-------------------------------#
 	
 </launch>
